@@ -1,0 +1,147 @@
+<!DOCTYPE html> 
+<html>
+<head>
+<title>K-Karaoke</title>
+<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.23/angular.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="/javascripts/socket.io.min.js"></script>
+<script src="/javascripts/user.js"></script>
+<script src="/javascripts/userlist.js"></script>
+<script src="/javascripts/remote.js"></script>
+<script src="/javascripts/Sortable.js"></script>
+<script src="/javascripts/ng-sortable.js"></script>
+<link rel="stylesheet" href="/views/base/stylesheets/user.css" />
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootswatch/3.2.0/sandstone/bootstrap.min.css">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+</head>
+<body ng-app="listApp">
+<div id="main_song_list_container" class="container-fluid" ng-controller="mainController">
+
+  <form>
+    <div id="search_bar_container" class="container-fluid">
+      <div id="search_bar">
+        <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+        <input id="query" type="text" placeholder="Search for song or artist" ng-model="searchTerm" onkeyup="youtubeSearch()">
+        <span id="clear_search_button" class="glyphicon glyphicon-remove-sign" aria-hidden="true" onclick="clearSearch()"></span>
+     </div>
+    </div>
+  </form>
+
+  <table id="main_list" class="table">    
+    <tbody>
+      <tr id="db_song_{{ song_obj.song_id }}" data-type="db_song" data-song_id="{{ song_obj.song_id }}" data-song="{{ song_obj.song }}" data-artist="{{ song_obj.artist }}" ng-repeat="song_obj in song_list | orderBy:sortType:sortReverse | filter:searchTerm" onclick="showAddSongPopup(this)">
+        <td>{{ song_obj.song }}</td>
+        <td>{{ song_obj.artist }}</td>
+      </tr>
+
+      <tr id="internet_song_{{ yt_obj.id }}" data-type="youtube_song" data-song_id="{{ yt_obj.id }}" data-song="{{ yt_obj.snippet.title }}" data-artist="YouTube" ng-repeat="yt_obj in youtube_list" onclick="showAddSongPopup(this)">
+        <td>{{ yt_obj.snippet.title }}</td>
+        <td>Internet</td>
+      </tr>
+
+    </tbody>    
+  </table>
+  
+  <!--Display player controls with current track and queue-->
+  <div id="footer">
+		<div onclick="togglePlayerPopup()">
+			<span class="glyphicon glyphicon-music glyphicon-big" aria-hidden="true"></span><br>Controls
+		</div>
+
+		<div onclick="toggleSortListPopup()">
+			<span class="glyphicon glyphicon-sort glyphicon-big" aria-hidden="true"></span><br>Sort List
+		</div>
+
+		<div>
+			<span class="glyphicon glyphicon-user glyphicon-big" aria-hidden="true"></span><br>User
+		</div>
+	</div>
+
+	<div id="sort_list_popup">
+		<div class="modal-header">
+			<h4 class="modal-title">Sort by:</h4>
+		</div>
+		<div class="modal-body">
+			<button class="btn btn-default" ng-click="sortType = 'song'; sortReverse = !sortReverse">Name</button>
+			<button class="btn btn-default" ng-click="sortType = 'artist'; sortReverse = !sortReverse">Artist</button>
+			<button class="btn btn-default" ng-click="sortType = 'artist'; sortReverse = !sortReverse">Date</button>
+		</div>
+	</div>
+</div>
+
+
+<div id="add_song_popup" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Add to playlist?</h4>
+      </div>
+      <div class="modal-body">
+        <h4 id="add_song_popup_songname">Song</h4>
+        <p id="add_song_popup_artist">Artist</p>
+      </div>
+      <div class="modal-footer">
+        <button id="add_song_popup_ok_button" class="btn btn-default">OK</button>
+        <button onclick="closeAddSongPopup()" class="btn btn-default">Cancel</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="player_popup" ng-controller="playerPopupController">
+	<h4>{{ player_state.playing.song }}</h4>
+	<h5>{{ player_state.playing.artist }}</h5>
+	<div id="player_controls_container">
+    <div id="prev_button" class="player_controls_button">
+			<span class="glyphicon glyphicon-step-backward glyphicon-big" aria-hidden="true"></span>
+  	</div>
+		<div id="rewind_button" class="player_controls_button" onclick="playerControl('rewind')">
+			<span class="glyphicon glyphicon-backward glyphicon-big" aria-hidden="true"></span>
+		</div>
+		<div id="play_pause_button" class="player_controls_button" onclick="playerControl('play_pause_song')">
+			<span class="glyphicon glyphicon-play glyphicon-big" aria-hidden="true"></span>
+		</div>
+		<div id="fastforward_button" class="player_controls_button" onclick="playerControl('fast_forward')">
+			<span class="glyphicon glyphicon-forward glyphicon-big" aria-hidden="true"></span>
+		</div>
+		<div id="skip_button" class="player_controls_button" onclick="playerControl('skip_song')">
+			<span class="glyphicon glyphicon-step-forward glyphicon-big" aria-hidden="true"></span>
+		</div>
+	</div>
+	<div id="volume_controls_container">
+		<div id="volume_down" class="player_controls_button" onclick="playerControl('volume_down')">
+			<span class="glyphicon glyphicon-volume-down glyphicon-big" aria-hidden="true"></span>
+		</div>
+		<div id="volume_slider"><input type="range" name="points" min="0" max="10"></div>
+		<div id="volume_up" class="player_controls_button" onclick="playerControl('volume_up')">
+			<span class="glyphicon glyphicon-volume-up glyphicon-big" aria-hidden="true"></span>
+		</div>
+	</div>
+
+	<h4>Up next:</h4>
+	<div id="queue_container">
+		<ul id="queue" ng-sortable="queueConfig">
+			<li ng-repeat="item in song_queue">
+				<div class="queue_remove_item">
+					<span ng-click="removeSong(item)" class="glyphicon glyphicon-minus-sign glyphicon-big" aria-hidden="true"></span>
+				</div>
+				<div class="queue_song_item">
+					<span>{{ item.song }}</span>
+					<span class="queue_song_artist">{{ item.artist }}</span><br>
+					<span class="queue_song_username">{{ item.username }}</span>
+				</div>
+				<div class="queue_item_handle">
+					<span class="glyphicon glyphicon-align-justify glyphicon-big" aria-hidden="true"></span>
+				</div>
+			</li>
+		</ul>
+	</div>
+</div>
+
+<div id="overlay"></div>
+</body>
+</html>

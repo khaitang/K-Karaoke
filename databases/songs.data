@@ -1,0 +1,11 @@
+PRAGMA foreign_keys=OFF;
+BEGIN TRANSACTION;
+CREATE TABLE songs (
+  song_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  `song` varchar(100) NOT NULL,
+  `artist` varchar(100) NOT NULL,
+  `filename` varchar(200) NOT NULL,
+  `date_added` int(11) NOT NULL
+);
+INSERT INTO "songs" VALUES(1,'Test Song','Test Artist','Test Song - Test Artist.mp4',1388515910278);
+COMMIT;
