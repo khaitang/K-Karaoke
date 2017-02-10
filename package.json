@@ -1,0 +1,45 @@
+{
+  "name": "k-karaoke",
+  "version": "1.0.0",
+  "description": "A NodeJS karaoke server and client app.",
+  "main": "server.js",
+  "dependencies": {},
+  "devDependencies": {
+    "bower": "^1.7.7",
+    "finalhandler": "^0.5.1",
+    "install": "^0.8.4",
+    "mysql": "^2.0.0-alpha7",
+    "node-static": "^0.6.7",
+    "serve-static": "^1.10.0",
+    "socket.io": "^0.9.13",
+    "sqlite3": "^3.1.8",
+    "watchr": "^2.3.7",
+    "xml2js": "^0.2.6",
+    "jasmine-core": "^2.4.1",
+    "karma": "^0.13.22",
+    "karma-chrome-launcher": "^0.2.3",
+    "karma-jasmine": "^0.3.8",
+    "protractor": "^4.0.9"
+  },
+  "scripts": {
+    "postinstall": "bower install",
+    "prestart": "npm install",
+    "start": "node server.js",
+    "pretest": "npm install",
+    "test": "karma start karma.conf.js",
+    "test-single-run": "karma start karma.conf.js --single-run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khaitang/K-Karaoke.git"
+  },
+  "keywords": [
+    "karaoke"
+  ],
+  "author": "Khai Tang",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/khaitang/K-Karaoke/issues"
+  },
+  "homepage": "https://github.com/khaitang/K-Karaoke#readme"
+}
