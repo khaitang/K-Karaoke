@@ -12,7 +12,7 @@ https://nodejs.org/en/#download
 2. Once you have NodeJS installed, open a command line terminal window on your computer and navigate to the folder where you've saved these files.
 
 3. Run the server by typing the following:
->node server.js
+>npm start
 
 4. This should start the server and you should now be able to access the services with your browser.
 
